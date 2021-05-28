@@ -4,16 +4,33 @@ defmodule EvaluateReview do
   """
 
   @doc """
-  Hello world.
+  cache review results
 
-  ## Examples
+  # TODO encode this as JSON rather than binary
 
-      iex> EvaluateReview.hello()
-      :world
+  credit to https://elixirforum.com/u/benwilson512
+
+  Caches review lists as binary data so as to avoid unnecessary
+  web scraping and to minimize suspicion
 
   """
-  def hello do
-    :world
+  def cache(review_list, filename) do
+    bytes = :erlang.term_to_binary(review_list)
+    {:ok, cache} = File.open(filename, [:write])
+    IO.binwrite(cache, bytes)
+  end
+
+  @doc """
+  load cache review results
+
+  credit to https://elixirforum.com/u/benwilson512
+
+  """
+
+  def load_from_cache(filename) do
+    bytes = File.read!(filename)
+    review_list = :erlang.binary_to_term(bytes)
+    review_list
   end
 
   @doc """
@@ -51,7 +68,7 @@ defmodule EvaluateReview do
 
   ## Examples
       
-      iex> url = "http://127.0.0.1:8000/manual.cache.dealerreviews.html"
+      iex> url = "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
       iex> reviews = EvaluateReview.scrape(url)
       iex> reviews |> Enum.with_index() |> Enum.each(fn {{a, b},_} -> IO.puts("review: #{a}, reviewer: #{b}") end)
 
@@ -91,8 +108,7 @@ defmodule EvaluateReview do
   of exclamation points included in the review
 
   ## Examples
-      
-      iex> url = "http://127.0.0.1:8000/manual.cache.dealerreviews.html"
+      iex> url = "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
       iex> reviews = EvaluateReview.scrape(url)
       iex> top3 = EvaluateReview.suspect_reviews(reviews)
       iex> IO.inspect(top3)
