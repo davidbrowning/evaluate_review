@@ -29,6 +29,11 @@ copy of dealerrater.com served from archive.org. Tests can be run with
 mix test ./test/
 ```
 
+Cache dependent tests are excluded by default, to run them
+
+```elixir
+mix test ./test --include needs_cache
+
 # Running
 
 To run the application, invoke the ./run.exs script with mix

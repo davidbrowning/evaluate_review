@@ -1,2 +1,2 @@
 ExUnit.start()
-ExUnit.configure(exclude: [external: true])
+ExUnit.configure(exclude: [needs_cache: true])
