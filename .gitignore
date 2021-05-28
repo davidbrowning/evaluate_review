@@ -26,4 +26,5 @@ evaluate_review-*.tar
 /tmp/
 
 # Caching filesystem 
-.cache/*
+.cache/*.bin
+.cache/*.json
