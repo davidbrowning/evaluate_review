@@ -1,0 +1,5 @@
+    IO.puts("is map: #{is_map(response.body)}")
+    IO.puts("is list: #{is_list(response.body)}")
+    IO.puts("is atom: #{is_atom(response.body)}")
+    IO.puts("is tuple: #{is_tuple(response.body)}")
+    IO.puts("is bitstring: #{is_bitstring(response.body)}")
