@@ -33,6 +33,7 @@ Cache dependent tests are excluded by default, to run them
 
 ```elixir
 mix test ./test --include needs_cache
+```
 
 # Running
 
