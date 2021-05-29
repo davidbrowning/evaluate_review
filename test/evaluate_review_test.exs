@@ -110,7 +110,7 @@ defmodule EvaluateReviewTest do
   test "scrape site agnostic" do
     url = "https://www.glassdoor.com/Reviews/Podium-Reviews-E1010497.htm"
     review_list = EvaluateReview.scrape(url, %{review: [".mb-xxsm", ".mt-0",".css-5j5djr"], reviewer: [".pt-xsm", ".pt-md-0", ".css-1qxtz39", ".eg4psks0"]})
-    IO.inspect(review_list)
+    IO.inspect(review_list) # YMMV on site output and some cleanup may be required
     assert is_list(review_list)
     assert is_tuple(hd(review_list))
   end

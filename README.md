@@ -5,8 +5,9 @@ EvaluateReview is a simple web scraper designed to detect inorganic overly posit
 Online reviews have become critical to market success, and nothing puts customers off quite like
 fake reviews and rating systems ripe with abuse. This service is intended to weed out fakers
 at the high end of the review scale. It will attempt to detect and flag the top three most 
-"overly positive" reviews and alert the user via log messages. It was tailored specifically for
-dealerrater.com 
+"overly positive" reviews and alert the user via log messages. Although tailored specifically for
+dealerrater.com, EvaluateReview can be used to scrape any review site if the selectors are narrow
+enough. It has been tested against glassdoor.com. 
 
 ## Installation
 
@@ -29,10 +30,17 @@ copy of dealerrater.com served from archive.org. Tests can be run with
 mix test ./test/
 ```
 
-Cache dependent tests are excluded by default, to run them
+Cache dependent tests are excluded by default, warm up your cache by running
+the default tests. Then include the cache dependent ones with --include needs_cache
 
 ```elixir
 mix test ./test --include needs_cache
+```
+
+Tests reliant on external sites beyond archive.org are excluded by default, to run them
+
+```elixir
+mix test ./test --include external
 ```
 
 # Running
