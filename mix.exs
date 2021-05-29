@@ -7,7 +7,15 @@ defmodule EvaluateReview.MixProject do
       version: "0.1.0",
       elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      name: "EvaluateReview",
+      source_url: "https://github.com/davidbrowning/evaluate_review",
+      docs: [
+        main: "readme",
+        extras: [
+          "README.md"
+        ]
+      ]
     ]
   end
 
@@ -23,7 +31,8 @@ defmodule EvaluateReview.MixProject do
     [
       {:httpoison, "~> 1.8"},
       {:jason, "~> 1.2"},
-      {:floki, "~> 0.30.0"}
+      {:floki, "~> 0.30.0"},
+      {:ex_doc, "~> 0.18", only: :dev},
     ]
   end
 end

@@ -48,6 +48,21 @@ defmodule EvaluateReview do
     with {:ok, body} <- File.read(filename), {:ok, json} <- Jason.decode(body), do: {:ok, json}
   end
 
+  @doc """
+  Uses Floki to recursively match a given list of selectors. Often times css selectors are used for 
+  many different tags on a page. The combination of several helps the user to narrow down their 
+  selection to a single tag.
+
+  """
+  def match_selectors([head | tail], document) do
+    result = Floki.find(document, head) 
+    match_selectors(tail, result)
+  end
+
+  def match_selectors([], result) do
+    result
+  end
+
   @doc ~S"""
   Scrape Dealer Rater Reviews
 
@@ -69,23 +84,26 @@ defmodule EvaluateReview do
   ## Examples
       
       iex> url = "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
-      iex> reviews = EvaluateReview.scrape(url)
+      iex> reviews = EvaluateReview.scrape(url, [])
       iex> reviews |> Enum.with_index() |> Enum.each(fn {{a, b},_} -> IO.puts("review: #{a}, reviewer: #{b}") end)
 
   """
-  def scrape(url) do
+  @defaults %{review: [".review-content"], reviewer: [".italic", ".font-18"]}
+
+  def scrape(url, selectors) do
     case HTTPoison.get(url) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
         {:ok, document} = Floki.parse_document(body)
-        reviews = Floki.find(document, ".review-content")
-        reviewers = Floki.find(document, ".italic") |> Floki.find(".font-18")
+        %{review: review, reviewer: reviewer} = Enum.into(selectors, @defaults)
+        reviews = match_selectors(review, document)
+        reviewers = match_selectors(reviewer, document)
         zipped_reviews = Enum.zip(reviews, reviewers)
 
-        # TODO a and b as lists feels unnecessary here convert to string
         stripped_reviews =
           zipped_reviews
-          |> Enum.with_index()
-          |> Enum.map(fn {{{_, _, a}, {_, _, b}}, _} -> {a, b} end)
+          |> Enum.map(fn {{_HTML_tag, _class_info, review_content}, 
+             {_tag, _class, reviewer_content}} -> 
+             {review_content, reviewer_content} end)
 
         stripped_reviews
 
@@ -100,7 +118,7 @@ defmodule EvaluateReview do
   @doc """
   Classify overly positive reviews
 
-  Takes a list of reviews in the format produced by EvaluateReview.scrape(url)
+  Takes a list of reviews in the format produced by EvaluateReview.scrape(url, [])
 
   Produces a list of the top three offenders ordered by severity 
 
@@ -109,7 +127,7 @@ defmodule EvaluateReview do
 
   ## Examples
       iex> url = "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
-      iex> reviews = EvaluateReview.scrape(url)
+      iex> reviews = EvaluateReview.scrape(url, [])
       iex> top3 = EvaluateReview.suspect_reviews(reviews)
       iex> IO.inspect(top3)
   """

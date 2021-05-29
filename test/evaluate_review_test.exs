@@ -40,7 +40,7 @@ defmodule EvaluateReviewTest do
         t_url
     end
     cache_file_wayback_reviews = ".cache/wayback.reviews.bin"
-    review_list = EvaluateReview.scrape(url)
+    review_list = EvaluateReview.scrape(url, [])
     EvaluateReview.cache(review_list, cache_file_wayback_reviews)
     assert File.exists?(cache_file_wayback_reviews)
   end
@@ -57,7 +57,7 @@ defmodule EvaluateReviewTest do
     end
   end
 
-  test "scrape review" do
+  test "match selectors" do
     cache_file_wayback_status = ".cache/wayback.status.json"
     url = if(File.exists?(cache_file_wayback_status)) do
         {:ok, wayback_status} = EvaluateReview.read_json(cache_file_wayback_status)
@@ -70,10 +70,47 @@ defmodule EvaluateReviewTest do
         t_url
     end
 
-    # live
-    # url =
-    #  "https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
-    review_list = EvaluateReview.scrape(url)
+    review_list = EvaluateReview.scrape(url, %{review: [".review-content"], reviewer: [".emp-467062",".teal", ".small-text"]})
+    review_list
+          |> Enum.each(fn {_, employee} -> assert(String.trim(to_string(employee)) == "Mariela Hernandez") end) 
+  end
+
+
+  test "scrape review" do
+    cache_file_wayback_status = ".cache/wayback.status.json"
+    url = if(File.exists?(cache_file_wayback_status)) do
+        {:ok, wayback_status} = EvaluateReview.read_json(cache_file_wayback_status)
+        t_url = "https://web.archive.org/web/#{wayback_status["timestamp"]}/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+        IO.puts("timestamp of latest archive: #{wayback_status["timestamp"]}")
+        t_url
+    else
+        t_url = "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+        IO.puts("still writing cache, manually setting last known archive.org date")
+        t_url
+    end
+    review_list = EvaluateReview.scrape(url, [])
+    assert is_list(review_list)
+    assert is_tuple(hd(review_list))
+  end
+
+  @tag external: true
+  test "scrape live review" do
+    url =
+     "https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+    review_list = EvaluateReview.scrape(url, [])
+    assert is_list(review_list)
+    assert is_tuple(hd(review_list))
+  end
+
+  # Proof of concept. Scraper works with other review sites though often finding the right selector
+  #  is challenging and data isn't necessarily as clean. 
+  #  In addition, shameless scraping from most sites will get you banned. To include this test, run 
+  #  mix test ./test --include external
+  @tag external: true
+  test "scrape site agnostic" do
+    url = "https://www.glassdoor.com/Reviews/Podium-Reviews-E1010497.htm"
+    review_list = EvaluateReview.scrape(url, %{review: [".mb-xxsm", ".mt-0",".css-5j5djr"], reviewer: [".pt-xsm", ".pt-md-0", ".css-1qxtz39", ".eg4psks0"]})
+    IO.inspect(review_list)
     assert is_list(review_list)
     assert is_tuple(hd(review_list))
   end
