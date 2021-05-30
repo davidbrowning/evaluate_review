@@ -5,7 +5,7 @@ if(File.exists?(filename) == false) do
     "https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/page3", 
     "https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/page4",
     "https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/page5"]
-  reviews = EvaluateReview.scrape_n(urls)
+  reviews = EvaluateReview.scrape_n(urls, [])
   EvaluateReview.cache(reviews, filename)
   IO.puts("current data pulled and cached")
 else
