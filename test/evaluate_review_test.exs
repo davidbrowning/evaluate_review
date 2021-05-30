@@ -30,15 +30,23 @@ defmodule EvaluateReviewTest do
 
   test "review cache" do
     cache_file_wayback_status = ".cache/wayback.status.json"
-    url = if(File.exists?(cache_file_wayback_status)) do
+
+    url =
+      if(File.exists?(cache_file_wayback_status)) do
         {:ok, wayback_status} = EvaluateReview.read_json(cache_file_wayback_status)
-        t_url = "https://web.archive.org/web/#{wayback_status["timestamp"]}/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+
+        t_url =
+          "https://web.archive.org/web/#{wayback_status["timestamp"]}/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+
         t_url
-    else
-        t_url = "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+      else
+        t_url =
+          "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+
         IO.puts("still writing cache, manually setting last known archive.org date")
         t_url
-    end
+      end
+
     cache_file_wayback_reviews = ".cache/wayback.reviews.bin"
     review_list = EvaluateReview.scrape(url, [])
     EvaluateReview.cache(review_list, cache_file_wayback_reviews)
@@ -48,6 +56,7 @@ defmodule EvaluateReviewTest do
   @tag needs_cache: true
   test "load review cache" do
     cache_file_wayback_reviews = ".cache/wayback.reviews.bin"
+
     if(File.exists?(cache_file_wayback_reviews)) do
       review_list = EvaluateReview.load_from_cache(cache_file_wayback_reviews)
       assert is_list(review_list)
@@ -59,35 +68,56 @@ defmodule EvaluateReviewTest do
 
   test "match selectors" do
     cache_file_wayback_status = ".cache/wayback.status.json"
-    url = if(File.exists?(cache_file_wayback_status)) do
+
+    url =
+      if(File.exists?(cache_file_wayback_status)) do
         {:ok, wayback_status} = EvaluateReview.read_json(cache_file_wayback_status)
-        t_url = "https://web.archive.org/web/#{wayback_status["timestamp"]}/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+
+        t_url =
+          "https://web.archive.org/web/#{wayback_status["timestamp"]}/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+
         IO.puts("timestamp of latest archive: #{wayback_status["timestamp"]}")
         t_url
-    else
-        t_url = "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+      else
+        t_url =
+          "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+
         IO.puts("still writing cache, manually setting last known archive.org date")
         t_url
-    end
+      end
 
-    review_list = EvaluateReview.scrape(url, %{review: [".review-content"], reviewer: [".emp-467062",".teal", ".small-text"]})
+    review_list =
+      EvaluateReview.scrape(url, %{
+        review: [".review-content"],
+        reviewer: [".emp-467062", ".teal", ".small-text"]
+      })
+
     review_list
-          |> Enum.each(fn {_, employee} -> assert(String.trim(to_string(employee)) == "Mariela Hernandez") end) 
+    |> Enum.each(fn {_, employee} ->
+      assert(String.trim(to_string(employee)) == "Mariela Hernandez")
+    end)
   end
-
 
   test "scrape review" do
     cache_file_wayback_status = ".cache/wayback.status.json"
-    url = if(File.exists?(cache_file_wayback_status)) do
+
+    url =
+      if(File.exists?(cache_file_wayback_status)) do
         {:ok, wayback_status} = EvaluateReview.read_json(cache_file_wayback_status)
-        t_url = "https://web.archive.org/web/#{wayback_status["timestamp"]}/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+
+        t_url =
+          "https://web.archive.org/web/#{wayback_status["timestamp"]}/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+
         IO.puts("timestamp of latest archive: #{wayback_status["timestamp"]}")
         t_url
-    else
-        t_url = "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+      else
+        t_url =
+          "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+
         IO.puts("still writing cache, manually setting last known archive.org date")
         t_url
-    end
+      end
+
     review_list = EvaluateReview.scrape(url, [])
     assert is_list(review_list)
     assert is_tuple(hd(review_list))
@@ -95,24 +125,37 @@ defmodule EvaluateReviewTest do
 
   test "scrape n reviews" do
     cache_file_wayback_status = ".cache/wayback.status.json"
-    url = if(File.exists?(cache_file_wayback_status)) do
+
+    url =
+      if(File.exists?(cache_file_wayback_status)) do
         {:ok, wayback_status} = EvaluateReview.read_json(cache_file_wayback_status)
-        t_url = "https://web.archive.org/web/#{wayback_status["timestamp"]}/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+
+        t_url =
+          "https://web.archive.org/web/#{wayback_status["timestamp"]}/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+
         IO.puts("timestamp of latest archive: #{wayback_status["timestamp"]}")
         t_url
-    else
-        t_url = "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+      else
+        t_url =
+          "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+
         IO.puts("still writing cache, manually setting last known archive.org date")
         t_url
-    end
+      end
+
     url_list = [url] ++ [url]
-    assert(EvaluateReview.scrape_n(url_list, []) == (EvaluateReview.scrape(url, []) ++ EvaluateReview.scrape(url, [])))
+
+    assert(
+      EvaluateReview.scrape_n(url_list, []) ==
+        EvaluateReview.scrape(url, []) ++ EvaluateReview.scrape(url, [])
+    )
   end
 
   @tag external: true
   test "scrape live review" do
     url =
-     "https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+      "https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+
     review_list = EvaluateReview.scrape(url, [])
     assert is_list(review_list)
     assert is_tuple(hd(review_list))
@@ -125,8 +168,15 @@ defmodule EvaluateReviewTest do
   @tag external: true
   test "scrape site agnostic" do
     url = "https://www.glassdoor.com/Reviews/Podium-Reviews-E1010497.htm"
-    review_list = EvaluateReview.scrape(url, %{review: [".mb-xxsm", ".mt-0",".css-5j5djr"], reviewer: [".pt-xsm", ".pt-md-0", ".css-1qxtz39", ".eg4psks0"]})
-    IO.inspect(review_list) # YMMV on site output and some cleanup may be required
+
+    review_list =
+      EvaluateReview.scrape(url, %{
+        review: [".mb-xxsm", ".mt-0", ".css-5j5djr"],
+        reviewer: [".pt-xsm", ".pt-md-0", ".css-1qxtz39", ".eg4psks0"]
+      })
+
+    # YMMV on site output and some cleanup may be required
+    IO.inspect(review_list)
     assert is_list(review_list)
     assert is_tuple(hd(review_list))
   end
@@ -134,6 +184,7 @@ defmodule EvaluateReviewTest do
   @tag needs_cache: true
   test "top three offenders" do
     cache_file_wayback_reviews = ".cache/wayback.reviews.bin"
+
     if(File.exists?(cache_file_wayback_reviews)) do
       review_list = EvaluateReview.load_from_cache(cache_file_wayback_reviews)
       assert is_list(review_list)

@@ -32,7 +32,7 @@ defmodule EvaluateReview.MixProject do
       {:httpoison, "~> 1.8"},
       {:jason, "~> 1.2"},
       {:floki, "~> 0.30.0"},
-      {:ex_doc, "~> 0.18", only: :dev},
+      {:ex_doc, "~> 0.18", only: :dev}
     ]
   end
 end

@@ -59,7 +59,7 @@ defmodule EvaluateReview do
   """
   @spec match_selectors(list, list) :: list[{tuple, tuple}]
   def match_selectors([head | tail], document) do
-    result = Floki.find(document, head) 
+    result = Floki.find(document, head)
     match_selectors(tail, result)
   end
 
@@ -106,9 +106,10 @@ defmodule EvaluateReview do
 
         stripped_reviews =
           zipped_reviews
-          |> Enum.map(fn {{_HTML_tag, _class_info, review_content}, 
-             {_tag, _class, reviewer_content}} -> 
-             {review_content, reviewer_content} end)
+          |> Enum.map(fn {{_HTML_tag, _class_info, review_content},
+                          {_tag, _class, reviewer_content}} ->
+            {review_content, reviewer_content}
+          end)
 
         stripped_reviews
 
@@ -130,6 +131,12 @@ defmodule EvaluateReview do
     reviews
   end
 
+  @spec defaultSuspector(tuple) :: tuple
+  defp defaultSuspector({a, b}) do
+    countExclamation = to_string(a) |> String.graphemes() |> Enum.count(&(&1 == "!"))
+    {{a, b}, countExclamation}
+  end
+
   @doc """
   Classify overly positive reviews
 
@@ -140,23 +147,30 @@ defmodule EvaluateReview do
   Current criteria for a suspicious review is simply based on a count of the number 
   of exclamation points included in the review
 
+  Tried passing the defaultSuspector function into suspect_reviews. Unfortunately, 
+  there's no way I could find to define function is this module AND make the function
+  available in such a manner
+
+  https://elixirforum.com/t/proposal-private-modules-general-discussion/19374/154
+
+  As such, a user could define their own suspector functions and pass them to 
+  suspect_review, but I can't seem to define them within this module
+
   ## Examples
       iex> url = "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
       iex> reviews = EvaluateReview.scrape(url, [])
       iex> top3 = EvaluateReview.suspect_reviews(reviews)
       iex> IO.inspect(top3)
   """
-  @spec suspect_reviews(list[tuple]) :: list[tuple]
-  def suspect_reviews(reviews) do
+
+  @spec suspect_reviews(list[tuple], function) :: list[tuple]
+  def suspect_reviews(reviews, suspector \\ nil) do
     rated_reviews =
-      reviews
-      |> Enum.with_index()
-      |> Enum.map(fn {{a, b}, _} ->
-        {{a, b},
-         to_string(a)
-         |> String.graphemes()
-         |> Enum.count(&(&1 == "!"))}
-      end)
+      if(is_function(suspector) == false) do
+        reviews |> Enum.map(fn {a, b} -> defaultSuspector({a, b}) end)
+      else
+        reviews |> Enum.map(fn {a, b} -> suspector.({a, b}) end)
+      end
 
     top_three =
       Enum.reverse(
