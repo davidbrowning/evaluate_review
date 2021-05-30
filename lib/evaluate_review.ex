@@ -127,7 +127,8 @@ defmodule EvaluateReview do
   """
   @spec scrape_n(list[String.t()], map) :: list[tuple]
   def scrape_n(urls, selectors) do
-    reviews = List.flatten(Enum.map(urls, fn x -> scrape(x, selectors) end))
+    s_map = Enum.into(selectors, @defaults)
+    reviews = List.flatten(Enum.map(urls, fn x -> scrape(x, s_map) end))
     reviews
   end
 

@@ -1,6 +1,9 @@
 defmodule EvaluateReview.MixProject do
   use Mix.Project
 
+  @description "A review webscraping library tailored for dealerrater.com"
+  @source_url "https://github.com/davidbrowning/evaluate_review"
+
   def project do
     [
       app: :evaluate_review,
@@ -9,7 +12,9 @@ defmodule EvaluateReview.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       name: "EvaluateReview",
-      source_url: "https://github.com/davidbrowning/evaluate_review",
+      description: @description,
+      package: package(),
+      source_url: @source_url,
       docs: [
         main: "readme",
         extras: [
@@ -33,6 +38,16 @@ defmodule EvaluateReview.MixProject do
       {:jason, "~> 1.2"},
       {:floki, "~> 0.30.0"},
       {:ex_doc, "~> 0.18", only: :dev}
+    ]
+  end
+   
+  defp package do
+    [
+      maintainers: ["Dave Browning"],
+      licenses: ["GPL"],
+      links: %{
+        GitHub: @source_url
+      }
     ]
   end
 end
