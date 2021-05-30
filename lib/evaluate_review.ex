@@ -14,6 +14,7 @@ defmodule EvaluateReview do
   web scraping and to minimize suspicion
 
   """
+  @spec cache(list[tuple], String.t()) :: :ok
   def cache(review_list, filename) do
     bytes = :erlang.term_to_binary(review_list)
     {:ok, cache} = File.open(filename, [:write])
@@ -27,6 +28,7 @@ defmodule EvaluateReview do
 
   """
 
+  @spec load_from_cache(String.t()) :: list[tuple]
   def load_from_cache(filename) do
     bytes = File.read!(filename)
     review_list = :erlang.binary_to_term(bytes)
@@ -44,6 +46,7 @@ defmodule EvaluateReview do
       iex> EvaluateReview.read_json(filename)
 
   """
+  @spec read_json(String.t()) :: map
   def read_json(filename) do
     with {:ok, body} <- File.read(filename), {:ok, json} <- Jason.decode(body), do: {:ok, json}
   end
@@ -54,6 +57,7 @@ defmodule EvaluateReview do
   selection to a single tag.
 
   """
+  @spec match_selectors(list, list) :: list[{tuple, tuple}]
   def match_selectors([head | tail], document) do
     result = Floki.find(document, head) 
     match_selectors(tail, result)
@@ -90,6 +94,7 @@ defmodule EvaluateReview do
   """
   @defaults %{review: [".review-content"], reviewer: [".italic", ".font-18"]}
 
+  @spec scrape(String.t(), map) :: list[tuple]
   def scrape(url, selectors) do
     case HTTPoison.get(url) do
       {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
@@ -116,6 +121,16 @@ defmodule EvaluateReview do
   end
 
   @doc """
+  Scrape a list of urls 
+
+  """
+  @spec scrape_n(list[String.t()], map) :: list[tuple]
+  def scrape_n(urls, selectors) do
+    reviews = List.flatten(Enum.map(urls, fn x -> scrape(x, selectors) end))
+    reviews
+  end
+
+  @doc """
   Classify overly positive reviews
 
   Takes a list of reviews in the format produced by EvaluateReview.scrape(url, [])
@@ -131,6 +146,7 @@ defmodule EvaluateReview do
       iex> top3 = EvaluateReview.suspect_reviews(reviews)
       iex> IO.inspect(top3)
   """
+  @spec suspect_reviews(list[tuple]) :: list[tuple]
   def suspect_reviews(reviews) do
     rated_reviews =
       reviews

@@ -93,6 +93,22 @@ defmodule EvaluateReviewTest do
     assert is_tuple(hd(review_list))
   end
 
+  test "scrape n reviews" do
+    cache_file_wayback_status = ".cache/wayback.status.json"
+    url = if(File.exists?(cache_file_wayback_status)) do
+        {:ok, wayback_status} = EvaluateReview.read_json(cache_file_wayback_status)
+        t_url = "https://web.archive.org/web/#{wayback_status["timestamp"]}/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+        IO.puts("timestamp of latest archive: #{wayback_status["timestamp"]}")
+        t_url
+    else
+        t_url = "https://web.archive.org/web/20201127110830/https://www.dealerrater.com/dealer/McKaig-Chevrolet-Buick-A-Dealer-For-The-People-dealer-reviews-23685/"
+        IO.puts("still writing cache, manually setting last known archive.org date")
+        t_url
+    end
+    url_list = [url] ++ [url]
+    assert(EvaluateReview.scrape_n(url_list, []) == (EvaluateReview.scrape(url, []) ++ EvaluateReview.scrape(url, [])))
+  end
+
   @tag external: true
   test "scrape live review" do
     url =
