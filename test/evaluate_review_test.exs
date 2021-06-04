@@ -97,6 +97,13 @@ defmodule EvaluateReviewTest do
       assert(String.trim(to_string(employee)) == "Mariela Hernandez")
     end)
   end
+  
+  test "isolate match_selector" do
+    html = ["<html><body><p class='selectme'>this is a test</p></body></html>"]
+    {:ok, document} = Floki.parse_document(html)
+    matches = EvaluateReview.match_selectors([".selectme"], document)
+    assert(matches == [{"p", [{"class", "selectme"}], ["this is a test"]}])
+  end
 
   test "scrape review" do
     cache_file_wayback_status = ".cache/wayback.status.json"
